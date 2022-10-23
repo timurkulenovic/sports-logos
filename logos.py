@@ -68,7 +68,7 @@ def download_image(sport, league, team):
     create_team_folder(sport, league, team)
     exception_source = exceptions(sport, league, team)
     if exception_source is None:
-        team_search = f'{team.replace(" ", "+")}+{sport}'
+        team_search = f'{team.replace(" ", "+")}'
         team_search_link = f"{WIKI_URL}/w/index.php?go=Go&search={team_search}&title=Special:Search&ns0=1"
         res = requests.get(team_search_link)
         bs_res = BeautifulSoup(res.text, "html.parser")
@@ -85,6 +85,7 @@ def download_image(sport, league, team):
             return source
         else:
             print("--------Cant download---------")
+            exit(0)
             return None
     else:
         return exception_source
