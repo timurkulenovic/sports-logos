@@ -64,11 +64,14 @@ def exceptions(sport, league, team):
         return None
 
 
-def download_image(sport, league, team):
+def download_image(sport, league, team, include_sport=False):
     create_team_folder(sport, league, team)
     exception_source = exceptions(sport, league, team)
     if exception_source is None:
-        team_search = f'{team.replace(" ", "+")}'
+        if not include_sport:
+            team_search = f'{team.replace(" ", "+").replace("&", "")}'
+        else:
+            team_search = f'{team.replace(" ", "+").replace("&", "")}+{sport}'
         team_search_link = f"{WIKI_URL}/w/index.php?go=Go&search={team_search}&title=Special:Search&ns0=1"
         res = requests.get(team_search_link)
         bs_res = BeautifulSoup(res.text, "html.parser")
@@ -83,6 +86,8 @@ def download_image(sport, league, team):
             href_img = bs_article.find("td", {"class": "infobox-image"}).find("a").find("img").get("src")
             source = write_from_url_to_file(href_img, sport, league, team)
             return source
+        elif not include_sport:
+            return download_image(sport, league, team, include_sport=True)
         else:
             print("--------Cant download---------")
             exit(0)
@@ -91,7 +96,7 @@ def download_image(sport, league, team):
         return exception_source
 
 
-def download_images():
+def download_images(start_index=0):
     sources = {}
     sport = input("Sport: ")
     league = input("League: ")
@@ -100,7 +105,7 @@ def download_images():
     teams = teams_file.read().splitlines()
 
     print(f"Total {len(teams)} teams")
-    for i, team in enumerate(teams):
+    for i, team in enumerate(teams[start_index:]):
         print(i, team)
         source = download_image(sport, league, team)
         sources[team] = source
